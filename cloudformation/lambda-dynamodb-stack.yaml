@@ -1,0 +1,114 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Stack to demonstrate some CloudFormation, CloudWatch Logs, DynamoDB, DynamoDB Streams, Lambda Functions, S3 related capabilities in Localstack"
+Parameters:
+  LambdaFunctionBucketName:
+    Type: String
+    Default: lambda-function-source-bucket
+Resources:
+
+  UserDataDynamoDbTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: userData
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+
+  SyncLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: sync-lambda-function
+      Handler: com.github.zoltanpal.demo.localstack.LambdaEntryPoint::handleRequest
+      Description: Synchronizes DynamoDB tables using DynamoDB Streams of the specified table on update events.
+      Role: !GetAtt SyncLambdaFunctionRole.Arn
+      Code:
+        S3Bucket: !Sub ${LambdaFunctionBucketName}
+        S3Key: dynamodb-sync-lambda.jar
+      Runtime: java11
+      Timeout: 60
+      MemorySize: 512
+
+  SyncLambdaFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: dynamodb-sync-lambda-role
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - 'lambda.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: dynamodb-sync-lambda-role-logging-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                  - 'logs:DescribeLogStreams'
+                Resource: 'arn:aws:logs:*:*:*'
+        - PolicyName: dynamodb-sync-lambda-role-source-stream-access-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:DescribeStream'
+                  - 'dynamodb:GetRecords'
+                  - 'dynamodb:GetShardIterator'
+                  - 'dynamodb:ListStreams'
+                Resource: 'arn:aws:dynamodb:::table/userData/stream/*'
+        - PolicyName: dynamodb-sync-lambda-role-destination-table-access-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:UpdateItem'
+                  - 'dynamodb:DeleteItem'
+                Resource: 'arn:aws:dynamodb:::table/userDataBackup'
+      Path: "/"
+
+  SyncLambdaFunctionInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt SyncLambdaFunction.Arn
+      Principal: s3.amazonaws.com
+
+  SyncLambdaFunctionEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: 100
+      Enabled: true
+      EventSourceArn: !GetAtt UserDataDynamoDbTable.Arn
+      FunctionName: !GetAtt SyncLambdaFunction.Arn
+
+  UserDataBackupDynamoDbTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: userDataBackup
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
