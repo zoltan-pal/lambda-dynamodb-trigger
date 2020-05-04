@@ -40,34 +40,34 @@ function dynamodb_lambda_demo() {
   echo "Put user to userData"
   awslocal dynamodb put-item \
     --table-name userData \
-    --item '{"id": {"S": "4b9b1a75-cafe-438b-8526-80f0e094e229"},"name": {"S": "John Doe"}}'
+    --item '{"userId": {"S": "4b9b1a75-cafe-438b-8526-80f0e094e229"},"userName": {"S": "John Doe"}}'
 
   echo "userDataBackup:"
   awslocal dynamodb get-item \
     --table-name userDataBackup \
-    --key '{"id": {"S": "4b9b1a75-cafe-438b-8526-80f0e094e229"}}'
+    --key '{"userId": {"S": "4b9b1a75-cafe-438b-8526-80f0e094e229"}}'
 
   echo "Update user in userData"
   awslocal dynamodb update-item \
     --table-name userData \
-    --key '{"id": {"S": "4b9b1a75-cafe-438b-8526-80f0e094e229"}}' \
-    --attribute-updates '{"name": {"Action": "PUT","Value": {"S":"John Connor"}}}' \
+    --key '{"userId": {"S": "4b9b1a75-cafe-438b-8526-80f0e094e229"}}' \
+    --attribute-updates '{"userName": {"Action": "PUT","Value": {"S":"John Connor"}}}' \
     --return-values UPDATED_NEW
 
   echo "userDataBackup:"
   awslocal dynamodb get-item \
     --table-name userDataBackup \
-    --key '{"id": {"S": "4b9b1a75-cafe-438b-8526-80f0e094e229"}}'
+    --key '{"userId": {"S": "4b9b1a75-cafe-438b-8526-80f0e094e229"}}'
 
   echo "Remove user from userData"
   awslocal dynamodb delete-item \
     --table-name userData \
-    --key '{"id": {"S": "4b9b1a75-cafe-438b-8526-80f0e094e229"}}'
+    --key '{"userId": {"S": "4b9b1a75-cafe-438b-8526-80f0e094e229"}}'
 
   echo "userDataBackup:"
   awslocal dynamodb get-item \
     --table-name userDataBackup \
-    --key '{"id": {"S": "4b9b1a75-cafe-438b-8526-80f0e094e229"}}'
+    --key '{"userId": {"S": "4b9b1a75-cafe-438b-8526-80f0e094e229"}}'
 }
 
 function dynamodbstreams_demo() {

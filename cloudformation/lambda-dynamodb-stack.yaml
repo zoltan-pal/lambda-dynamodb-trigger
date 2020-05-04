@@ -11,10 +11,10 @@ Resources:
     Properties:
       TableName: userData
       AttributeDefinitions:
-        - AttributeName: id
+        - AttributeName: userId
           AttributeType: S
       KeySchema:
-        - AttributeName: id
+        - AttributeName: userId
           KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: 5
@@ -104,10 +104,10 @@ Resources:
     Properties:
       TableName: userDataBackup
       AttributeDefinitions:
-        - AttributeName: id
+        - AttributeName: userId
           AttributeType: S
       KeySchema:
-        - AttributeName: id
+        - AttributeName: userId
           KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: 5

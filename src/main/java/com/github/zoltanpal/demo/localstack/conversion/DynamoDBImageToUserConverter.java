@@ -8,8 +8,8 @@ import java.util.Map;
 public class DynamoDBImageToUserConverter {
 
     public User convert(Map<String, AttributeValue> dynamoDBImage) {
-        var id = dynamoDBImage.get("id").getS();
-        var name = dynamoDBImage.get("name").getS();
+        var id = dynamoDBImage.get("userId").getS();
+        var name = dynamoDBImage.get("userName").getS();
         return new User(id, name);
     }
 }

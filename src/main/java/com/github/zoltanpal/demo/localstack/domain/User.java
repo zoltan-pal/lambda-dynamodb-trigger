@@ -9,9 +9,9 @@ import java.util.StringJoiner;
 @DynamoDBTable(tableName="userDataBackup")
 public class User {
 
-    @DynamoDBHashKey
+    @DynamoDBHashKey(attributeName = "userId")
     private String id;
-    @DynamoDBAttribute
+    @DynamoDBAttribute(attributeName = "userName")
     private String name;
 
     public User() {
