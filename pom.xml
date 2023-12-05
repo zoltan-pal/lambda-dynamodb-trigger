@@ -14,7 +14,7 @@
     <dependency.versions.aws-lambda-java-events>2.2.7</dependency.versions.aws-lambda-java-events>
     <dependency.versions.aws-java-sdk>1.11.769</dependency.versions.aws-java-sdk>
     <dependency.versions.slf4j>1.7.25</dependency.versions.slf4j>
-    <dependency.versions.logback>1.2.3</dependency.versions.logback>
+    <dependency.versions.logback>1.2.13</dependency.versions.logback>
     <plugin.versions.maven-compiler>3.6.1</plugin.versions.maven-compiler>
     <plugin.versions.maven-assembly>3.1.1</plugin.versions.maven-assembly>
   </properties>
